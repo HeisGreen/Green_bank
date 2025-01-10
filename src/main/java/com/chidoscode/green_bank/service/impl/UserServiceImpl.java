@@ -4,8 +4,12 @@ import com.chidoscode.green_bank.dto.*;
 import com.chidoscode.green_bank.entity.Transaction;
 import com.chidoscode.green_bank.entity.User;
 import com.chidoscode.green_bank.repository.UserRepository;
+import com.chidoscode.green_bank.security.JwtTokenProvider;
 import com.chidoscode.green_bank.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +28,13 @@ public class UserServiceImpl implements UserService {
     TransactionService transactionService;
 
     @Autowired
+    AuthenticationManager authenticationManager;
+
+    @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Autowired
+    JwtTokenProvider jwtTokenProvider;
 
     @Override
     public BankResponse createAccount(UserRequest userRequest) {
@@ -51,7 +61,7 @@ public class UserServiceImpl implements UserService {
                 .accountNumber(AccountUtils.generateAccountNumber())
                 .accountBalance(BigDecimal.ZERO)
                 .email(userRequest.getEmail())
-                .password(userRequest.getPassword())
+                .password(passwordEncoder.encode(userRequest.getPassword()))
                 .phoneNumber(userRequest.getPhoneNumber())
                 .alternatePhoneNumber(userRequest.getAlternatePhoneNumber())
                 .status("ACTIVE")
@@ -74,6 +84,25 @@ public class UserServiceImpl implements UserService {
                         .accountName(savedUser.getFirstName() + " " + savedUser.getLastName() + " " + savedUser.getOtherName())
                         .build())
                 .emailStatus("Email Sent Successfully")
+                .build();
+    }
+
+    public BankResponse login(UserLoginRequest loginRequest){
+        Authentication authentication = null;
+        authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(),
+                loginRequest.getPassword()));
+
+        EmailDetails loginAlert = EmailDetails.builder()
+                .subject("You are logged in")
+                .recipient(loginRequest.getEmail())
+                .messageBody("You're logged in to your account. If this was not you, contact your bank")
+                .build();
+
+        emailService.sendEmailAlert(loginAlert);
+
+        return BankResponse.builder()
+                .responseCode("LOGIN_SUCCESS")
+                .responseMessage(jwtTokenProvider.generateToken(authentication))
                 .build();
     }
 
@@ -261,4 +290,5 @@ public class UserServiceImpl implements UserService {
                         .build())
                 .build();
     }
+
 }
