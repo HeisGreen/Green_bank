@@ -102,5 +102,16 @@ public class UserController {
         return userService.transfer(request);
     }
 
-
+    @Operation(
+            summary = "Login",
+            description = "This endpoint enables the user to login."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "HTTP header 200 login Successful"
+    )
+    @PostMapping("/login")
+    public BankResponse login(@RequestBody UserLoginRequest loginRequest){
+        return userService.login(loginRequest);
+    }
 }

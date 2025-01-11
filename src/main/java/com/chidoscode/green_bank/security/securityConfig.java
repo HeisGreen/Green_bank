@@ -53,7 +53,8 @@ public class securityConfig {
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless REST API
                 .authorizeHttpRequests(authorize ->
                         authorize
-                                .requestMatchers(HttpMethod.POST, "/api/user/createUser").permitAll() // Public POST endpoint
+                                .requestMatchers(HttpMethod.POST, "/api/user/createUser").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()// Public POST endpoint
                                 .anyRequest().authenticated()) // All other endpoints require authentication
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // Stateless session

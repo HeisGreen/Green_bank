@@ -1,7 +1,7 @@
 package com.chidoscode.green_bank.service.impl;
 
 import com.chidoscode.green_bank.dto.*;
-import com.chidoscode.green_bank.entity.Transaction;
+import com.chidoscode.green_bank.entity.Role;
 import com.chidoscode.green_bank.entity.User;
 import com.chidoscode.green_bank.repository.UserRepository;
 import com.chidoscode.green_bank.security.JwtTokenProvider;
@@ -63,6 +63,7 @@ public class UserServiceImpl implements UserService {
                 .email(userRequest.getEmail())
                 .password(passwordEncoder.encode(userRequest.getPassword()))
                 .phoneNumber(userRequest.getPhoneNumber())
+                .role(Role.ROLE_USER)
                 .alternatePhoneNumber(userRequest.getAlternatePhoneNumber())
                 .status("ACTIVE")
                 .build();
